@@ -1,0 +1,111 @@
+- Project core feature breakdown
+
+  - Creating teams
+    - Professor navigates to the team creation mask of one of his lectures
+        - Gives a team a name
+        - Professor picks students enrolled in his lecture from a list
+        - Submits the team creation form
+    - System checks the team creation process
+        - Team is validated
+            - Enough number of students?
+            - Too many students?
+            - Students not assigned multiple times?
+            - Team name is available?
+        - Gives team an identifier
+    - Professor gets the result of team creation validation and the team ID
+
+  - Creating projects
+    - Professor navigates to the project creation mask of one of his lectures
+        - Project name (mandatory)
+        - Deadline (mandatory)
+        - Description (optional)
+        - Sample solution (optional)
+        - Submits the team creation form
+    - System checks the team creation process
+        - Project is validated
+            - Mandatory fields are filled and the project has a unique name
+        - Gives project an identifier and a creation date
+    - Professor gets the result of project creation validation and project ID
+
+  - Assigning Projects to Teams
+    - Professor navigates to the projects of one of his lectures
+    - Professor clicks on the assign button for a project that has no team
+    - Professor selects a team among the teams that have no projects assigned and clicks on the confirm button
+    - System checks the team creation process
+        - Teams have to projects assigned
+        - Show the result of validation (Errors,...)
+        - Correctly assign the project to team
+    - Professor gets the result of the assigning process
+
+  - Submit Projects
+    - Students navigate to the lecture page that they want to submit a project for
+    - Choose the desired project to submit the file
+    - Hit the upload button to upload the project file
+    - System checks the uploading project process
+        - Disable or disable button in case of a missing deadline
+        - Size of the file?
+    - Students get notify of the result of the uploading process (Success or Failed)
+
+
+  - Team task IV: Identify responsibilities
+    - Look in one of our core features for things only our system really is responsible - maybe categorize these responsibilities into groups
+
+  - Creating teams: responsibilities
+    - Representation responsibilities:
+      - Correct representation of the professor's lectures in a list
+      - Correct list overview of students present in a selected lecture
+      - Correct visualization of a team creation form
+      - The system correctly notifies the professor about the team creation process
+    - Data collection responsibilities
+      - Correct fetching of the students present in the lecture ('Professor picks a student ...')
+      - Correct reading given selection made by professor (All user input in the form)
+    - Data validation responsibilities
+      - Validates the number of students in a team is within the given limits for team capacity
+      - Checks that every student is only assigned to one team
+      - Ensures the unique existence of team name and that team name is non-empty
+    - Data assignment responsibilities
+      - Give a valid (unique) identifier for the team
+
+  - Creating Projects
+    - Representation responsibilities
+      - Correct representation of the projects created
+      - Correct visualization of the project creation form
+      - The system correctly notifies the professor about the project creation process
+    - Data collection responsibilities
+      - Correct fetching of the already created projects in the lecture
+      - Correct reading given selection made by professor (All user input in the form)
+    - Data validation responsibilities
+      - Ensures the unique existence of project name
+      - Validates that the mandatory fields are filled
+    - Data assignment responsibilities
+      - Give a valid (unique) identifier for the project
+      - Give a creation date for the project when it is successfully created
+
+  - Assigning Projects to Teams
+    - Representation responsibilities
+      - Correct representation of the projects for the given lecture
+      - Correct representation of a project with an assigned team and without an assignee (the button next to the team changes accordingly)
+      - When clicked on the assign button: Correct representation of teams that have no projects
+      - Correctly notifying the professor about the assigning process
+    - Data collection responsibilities
+      - Correctly fetching the projects and their assignee field for the given lecture
+      - Correctly fetching the teams that have no project
+    - Data validation responsibilities
+      - Validates that the project has no assignee
+      - Validates that the team has no project
+    - Data assignment responsibilities
+      - Adds the given team as an assignee field for the given project
+
+  - Submit Projects
+    - Representation responsibilities
+      - Correct representation of the status of the submission repository
+      - Correct representation of the student submit mask
+      - Correct representation of the submission history
+    - Data collection responsibilities
+      - Correctly fetching submission history
+      - Persistence of the given GitHub link
+      - Correctly fetching the collaborators
+    - Data validation responsibilities
+      - Validating the consistency of the GitHub link
+    - Data assignment responsibilities
+      - Assigning new submissions as the latest deliverable
