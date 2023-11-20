@@ -1,44 +1,46 @@
 workspace {
 
   model {
-    student = person "Student" "A student at the university."
-    professor = person "Professor" "A professor at the university."
+    professor = person "Professor" "A professor who can create teams, create projects, and assign projects to teams."
+    student = person "Student" "A student who can view and submit projects."
 
-    projectSystem = softwareSystem "Project System" "Allows professors to create and manage student teams and projects." {
-        projectWebApp = container "Project Web Application" "Enables interaction with project-related data." "Web Application" {
-            teamManagementComponent = component "Team Management Component" "Allows professors to create teams."
-            projectManagementComponent = component "Project Management Component" "Allows professors to create projects."
-            assignmentComponent = component "Assignment Component" "Handles assigning projects to teams."
-            submissionComponent = component "Submission Component" "Allows students to submit their projects."
-            
-            professor -> teamManagementComponent "Requests to create team"
-            professor -> projectManagementComponent "Requests to create project"
-            professor -> assignmentComponent "Requests to assign project to team"
-            student -> submissionComponent "Submits project"
-        }
+    projectSystem = softwareSystem "Project System" "Allows creation and management of student teams and their projects." {
+      
+      representationService = container "Representation Service" "Manages the presentation layer for both professors and students." "Web Application" {
+        webServer = component "Web Server" "Handles HTTP requests and serves web pages."
+        businessLogic = component "Business Logic" "Handles the core functionality of team and project management."
+        sessionManager = component "Session Manager" "Manages user sessions and authentication."
+      }
 
-        db = container "Database" "Stores all the project-related data." "Relational Database Schema" {
+      dataManager = container "Data Manager" "Handles database operations and data validation." "Service" {
+        teamsDao = component "Teams DAO" "Data access operations for teams."
+        projectsDao = component "Projects DAO" "Data access operations for projects."
+        submissionsDao = component "Submissions DAO" "Data access operations for submissions."
+        dataValidator = component "Data Validator" "Validates input data for consistency and correctness."
+        queryProcessor = component "Query Processor" "Processes and optimizes database queries."
+      }
+      
+      database = container "Database" "Shared database between submodules of the SIS" "Database" { 
+            tags "Database"
             teamsTable = component "Teams Table" "Stores information about teams."
             projectsTable = component "Projects Table" "Stores information about projects."
             submissionsTable = component "Submissions Table" "Stores information about project submissions."
-        }
-
-        projectWebApp -> db "Reads from and writes to"
-        teamManagementComponent -> teamsTable "Validates team information and writes to Teams Table"
-        projectManagementComponent -> projectsTable "Validates project information and writes to Projects Table"
-        assignmentComponent -> teamsTable "Reads from Teams Table"
-        assignmentComponent -> projectsTable "Writes to Projects Table"
-        submissionComponent -> submissionsTable "Validates submissions and writes to Submissions Table"
+      }
+      
+      representationService -> dataManager "Uses"
+      dataManager -> database "Reads from and writes to"
     }
-
-    student -> projectWebApp "Uses"
-    professor -> projectWebApp "Uses"
+    
+   
+    
+    professor -> representationService "Interacts with"
+    student -> representationService "Interacts with"
   }
 
   views {
     systemContext projectSystem {
-      include student
       include professor
+      include student
       autolayout lr
     }
 
@@ -47,7 +49,12 @@ workspace {
       autolayout lr
     }
 
-    component projectWebApp {
+    component representationService {
+      include *
+      autolayout lr
+    }
+
+    component dataManager {
       include *
       autolayout lr
     }
@@ -69,6 +76,11 @@ workspace {
         shape person
         background #08427b
         color #ffffff
+      }
+      element "Database" {
+        shape cylinder
+        background #facc2e
+        color #000000
       }
     }
   }
