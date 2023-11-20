@@ -1,74 +1,55 @@
-/**
- * This file contains the architecture model and views
- * for the Project System.
- * It follows the C4 model structure for software architecture
- * representation.
- */
-
 workspace {
 
   model {
     student = person "Student" "A student at the university."
     professor = person "Professor" "A professor at the university."
 
-    projectSystem = softwareSystem "Project (Sub-)System" "Allows creation and management of student teams and their projects." {
-        professorInterface = container "Professor Interface" "Enables professors to interact with the system for team and project management." "Web Application" {
-            teamManagementComponent = component "Team Management Component" "Allows professors to create and manage teams."
-            projectManagementComponent = component "Project Management Component" "Allows professors to create and define new projects."
-            assignmentComponent = component "Assignment Component" "Handles the assignment of projects to teams."
-        }
-        
-        studentInterface = container "Student Interface" "Enables students to interact with the system for project submission and overview." "Web Application" {
-            projectSubmissionComponent = component "Project Submission Component" "Allows students to submit their projects via a Git link."
-            projectOverviewComponent = component "Project Overview Component" "Provides students with an overview of projects, deadlines, and team details."
-        }
-        
-        validator = container "Validator" "Validates user input and system data." "Service" {
-            dataValidationComponent = component "Data Validation Component" "Checks professor's inputs for creating teams and projects, and validates student Git link submissions."
+    projectSystem = softwareSystem "Project System" "Allows professors to create and manage student teams and projects." {
+        projectWebApp = container "Project Web Application" "Enables interaction with project-related data." "Web Application" {
+            teamManagementComponent = component "Team Management Component" "Allows professors to create teams."
+            projectManagementComponent = component "Project Management Component" "Allows professors to create projects."
+            assignmentComponent = component "Assignment Component" "Handles assigning projects to teams."
+            submissionComponent = component "Submission Component" "Allows students to submit their projects."
+            
+            professor -> teamManagementComponent "Requests to create team"
+            professor -> projectManagementComponent "Requests to create project"
+            professor -> assignmentComponent "Requests to assign project to team"
+            student -> submissionComponent "Submits project"
         }
 
-        dataManager = container "Data Manager" "Manages data persistence and retrieval." "Data Access" {
+        db = container "Database" "Stores all the project-related data." "Relational Database Schema" {
             teamsTable = component "Teams Table" "Stores information about teams."
             projectsTable = component "Projects Table" "Stores information about projects."
-            submissionsTable = component "Submissions Table" "Stores submissions, tracking Git links and associated team data."
+            submissionsTable = component "Submissions Table" "Stores information about project submissions."
         }
-        
-        database = container "Database" "Shared database between submodules of the SIS"{
-            tags "Database"
-        }
-        
-        professorInterface -> validator "Uses for validating input data"
-        studentInterface -> validator "Uses for validating input data"
-        
-        professorInterface -> dataManager "Read data from database"
-        studentInterface -> dataManager "Read data from database"
-        
-        validator -> dataManager "Write validated records"
-        
-        dataManager -> database "Access database"
+
+        projectWebApp -> db "Reads from and writes to"
+        teamManagementComponent -> teamsTable "Validates team information and writes to Teams Table"
+        projectManagementComponent -> projectsTable "Validates project information and writes to Projects Table"
+        assignmentComponent -> teamsTable "Reads from Teams Table"
+        assignmentComponent -> projectsTable "Writes to Projects Table"
+        submissionComponent -> submissionsTable "Validates submissions and writes to Submissions Table"
     }
-    
-    // enrollmentSystem = softwareSystem "Enrollment (Sub-)System" "Allows access to enrollment information of students"
-    
-    // projectSystem -> enrollmentSystem "Fetches enrollment data from"
-    
-    student -> studentInterface "Uses for project overview and submission"
-    professor -> professorInterface "Uses for team and project management"
+
+    student -> projectWebApp "Uses"
+    professor -> projectWebApp "Uses"
   }
 
-    views {
-    // System Context view
+  views {
     systemContext projectSystem {
-    include student
-    include professor
-    // include enrollmentSystem
-    autolayout lr
+      include student
+      include professor
+      autolayout lr
     }
-    
-    // Container aggregation view
+
     container projectSystem {
-    include *
-    autolayout lr
+      include *
+      autolayout lr
+    }
+
+    component projectWebApp {
+      include *
+      autolayout lr
     }
 
     styles {
@@ -86,11 +67,6 @@ workspace {
       }
       element "Person" {
         shape person
-        background #08427b
-        color #ffffff
-      }
-      element "Database" {
-        shape cylinder
         background #08427b
         color #ffffff
       }
