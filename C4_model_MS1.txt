@@ -6,17 +6,16 @@ workspace {
 
     projectSystem = softwareSystem "Project System" "Allows creation and management of student teams and their projects." {
       
-      representationService = container "Representation Service" "Manages the presentation layer for both professors and students." "Web Application" {
-        webServer = component "Web Server" "Handles HTTP requests and serves web pages."
+      representationService = container "Representation Service" "Manages the presentation and logic layer for both professors and students" "Web Application" {
+        HtmlPages = component "Http page" "Renders web pages."
+        webServer = component "Web Server" "Handles HTTP requests."
         businessLogic = component "Business Logic" "Handles the core functionality of team and project management."
         sessionManager = component "Session Manager" "Manages user sessions and authentication."
         webServer -> businessLogic "Forwards the user request"
-        professor -> webServer "Logs in and sends requests"
+        HtmlPages -> webServer "Gets the user input data."
+        professor -> HtmlPages "Logs in and sends requests"
         businessLogic -> sessionManager "Passes the user info"
-        student -> webServer "Logs in and sends requests"
-      }
-
-      dataManager = container "Data Manager" "Handles database operations and data validation." "Service" {
+        student -> HtmlPages "Logs in and sends requests"
         teamsDao = component "Teams DAO" "Data access operations for teams."
         projectsDao = component "Projects DAO" "Data access operations for projects."
         submissionsDao = component "Submissions DAO" "Data access operations for submissions."
@@ -40,11 +39,9 @@ workspace {
             submissionsTable = component "Submissions Table" "Stores information about project submissions."
       }
       
-      representationService -> dataManager "Uses"
-      dataManager -> database "Reads from and writes to"
     }
     
-    representationService -> database "Fetches data from DB"
+    representationService -> database "Fetches and stores data from DB"
     
     deploymentEnvironment "Live"    {
             deploymentNode "User's Application Service" "" ""    {
@@ -57,15 +54,8 @@ workspace {
                 }
             }
             
-
-     
-            
         }
     
-   
-    
-    professor -> representationService "Interacts with"
-    student -> representationService "Interacts with"
   }
 
   views {
@@ -81,11 +71,6 @@ workspace {
     }
 
     component representationService {
-      include *
-      autolayout lr
-    }
-
-    component dataManager {
       include *
       autolayout lr
     }
