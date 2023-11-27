@@ -8,13 +8,11 @@ workspace {
       
       representationService = container "Project Service" "Manages the presentation and logic layer for both professors and students" "Web Application" {
         HtmlPages = component "Http page" "Renders web pages."
-        webServer = component "Web Server" "Handles HTTP requests."
-        businessLogic = component "Business Logic" "Handles the core functionality of team and project management."
-        webServer -> businessLogic "Forwards the user request"
-        HtmlPages -> webServer "Gets the user input data."
-        professor -> HtmlPages "Logs in and sends requests"
+        webServer = component "Business Logic" "Handles HTTP requests."
         dataValidator = component "Data Validator" "Validates input data for consistency and correctness."
-        businessLogic -> dataValidator "Forwards the request for correct data fetching."
+        webServer -> dataValidator "Forwards the request for correct data fetching."
+        HtmlPages -> webServer "Sends the user input data."
+        professor -> HtmlPages "Logs in and sends requests"
         student -> HtmlPages "Logs in and sends requests"
         teamsDao = component "Teams DAO" "Data access operations for teams."
         projectsDao = component "Projects DAO" "Data access operations for projects."
@@ -26,7 +24,14 @@ workspace {
         submissionsDao -> queryProcessor "Sends the request"
         teamsDao -> queryProcessor  "Sends the request"
         projectsDao -> queryProcessor  "Sends the request"
-        
+        queryProcessor -> submissionsDao "Sends back the required data."
+        queryProcessor -> projectsDao "Sends back the required data."
+        queryProcessor -> teamsDao "Sends required data or gives ACK/NACK."
+        submissionsDao -> webServer "Forwards requested data or gives ACK/NACK"
+        projectsDao -> webServer "Forwards requested data or gives ACK/NACK"
+        teamsDao -> webServer "Forwards requested data or gives ACK/NACK"
+        webServer -> HtmlPages "Sends display data"
+                
       }
       
       database = container "Database" "Shared database between submodules of the SIS" "Database" { 
@@ -72,7 +77,7 @@ workspace {
       autolayout lr
     }
     
-    deployment projectSystem "Live" "Live_Deployment"   {
+    deployment projectSystem "Live" "Deployment"   {
             include *
             autolayout lr
     }
