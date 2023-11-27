@@ -9,9 +9,11 @@ workspace {
       representationService = container "Project Service" "Manages the presentation and logic layer for both professors and students" "Web Application" {
         HtmlPages = component "Http page" "Renders web pages."
         webServer = component "Business Logic" "Handles HTTP requests."
+        webDisplayer = component "Web Server" "Serves Website Data"
         dataValidator = component "Data Validator" "Validates input data for consistency and correctness."
         webServer -> dataValidator "Forwards the request for correct data fetching."
-        HtmlPages -> webServer "Sends the user input data."
+        HtmlPages -> webDisplayer "Sends the user input data."
+        webDisplayer -> "webServer" "Forwards user data"
         professor -> HtmlPages "Logs in and sends requests"
         student -> HtmlPages "Logs in and sends requests"
         teamsDao = component "Teams DAO" "Data access operations for teams."
@@ -30,7 +32,8 @@ workspace {
         submissionsDao -> webServer "Forwards requested data or gives ACK/NACK"
         projectsDao -> webServer "Forwards requested data or gives ACK/NACK"
         teamsDao -> webServer "Forwards requested data or gives ACK/NACK"
-        webServer -> HtmlPages "Sends display data"
+        webServer -> webDisplayer "Sends business data"
+        webDisplayer -> HtmlPages "Sends website data"
                 
       }
       
