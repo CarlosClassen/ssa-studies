@@ -6,18 +6,30 @@ workspace {
 
     projectSystem = softwareSystem "Project System" "Allows creation and management of student teams and their projects." {
       
-      representationService = container "Representation Service" "Manages the presentation layer for both professors and students." "Web Application" {
-        webServer = component "Web Server" "Handles HTTP requests and serves web pages."
+      representationService = container "Representation Service" "Manages the presentation and logic layer for both professors and students" "Web Application" {
+        HtmlPages = component "Http page" "Renders web pages."
+        webServer = component "Web Server" "Handles HTTP requests."
         businessLogic = component "Business Logic" "Handles the core functionality of team and project management."
         sessionManager = component "Session Manager" "Manages user sessions and authentication."
-      }
-
-      dataManager = container "Data Manager" "Handles database operations and data validation." "Service" {
+        webServer -> businessLogic "Forwards the user request"
+        HtmlPages -> webServer "Gets the user input data."
+        professor -> HtmlPages "Logs in and sends requests"
+        businessLogic -> sessionManager "Passes the user info"
+        student -> HtmlPages "Logs in and sends requests"
         teamsDao = component "Teams DAO" "Data access operations for teams."
         projectsDao = component "Projects DAO" "Data access operations for projects."
         submissionsDao = component "Submissions DAO" "Data access operations for submissions."
         dataValidator = component "Data Validator" "Validates input data for consistency and correctness."
         queryProcessor = component "Query Processor" "Processes and optimizes database queries."
+        sessionManager -> dataValidator "Sends input data to"
+        
+        dataValidator -> teamsDao "Sends data concerning teams"
+        dataValidator -> projectsDao "Sends data concerning projects"
+        dataValidator -> submissionsDao "Sends data concerning the submission"
+        submissionsDao -> queryProcessor "Sends the request"
+        teamsDao -> queryProcessor  "Sends the request"
+        projectsDao -> queryProcessor  "Sends the request"
+        
       }
       
       database = container "Database" "Shared database between submodules of the SIS" "Database" { 
@@ -27,14 +39,23 @@ workspace {
             submissionsTable = component "Submissions Table" "Stores information about project submissions."
       }
       
-      representationService -> dataManager "Uses"
-      dataManager -> database "Reads from and writes to"
     }
     
-   
+    representationService -> database "Fetches and stores data from DB"
     
-    professor -> representationService "Interacts with"
-    student -> representationService "Interacts with"
+    deploymentEnvironment "Live"    {
+            deploymentNode "User's Application Service" "" ""    {
+                clientAppInstance = containerinstance representationService
+            }
+            
+            deploymentNode "Database Server" "" "Ubuntu 18.04 LTS"   {
+                deploymentNode "Relational DB" "" "Oracle 19.1.0" {
+                    databaseInstance = containerInstance database
+                }
+            }
+            
+        }
+    
   }
 
   views {
@@ -53,12 +74,13 @@ workspace {
       include *
       autolayout lr
     }
-
-    component dataManager {
-      include *
-      autolayout lr
+    
+    deployment projectSystem "Live" "Live_Deployment"   {
+            include *
+            autolayout lr
     }
-
+        
+        
     styles {
       element "Software System" {
         background #1168bd
