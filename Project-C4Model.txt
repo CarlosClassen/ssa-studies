@@ -6,23 +6,20 @@ workspace {
 
     projectSystem = softwareSystem "Project System" "Allows creation and management of student teams and their projects." {
       
-      representationService = container "Representation Service" "Manages the presentation and logic layer for both professors and students" "Web Application" {
+      representationService = container "Project Service" "Manages the presentation and logic layer for both professors and students" "Web Application" {
         HtmlPages = component "Http page" "Renders web pages."
         webServer = component "Web Server" "Handles HTTP requests."
         businessLogic = component "Business Logic" "Handles the core functionality of team and project management."
-        sessionManager = component "Session Manager" "Manages user sessions and authentication."
         webServer -> businessLogic "Forwards the user request"
         HtmlPages -> webServer "Gets the user input data."
         professor -> HtmlPages "Logs in and sends requests"
-        businessLogic -> sessionManager "Passes the user info"
+        dataValidator = component "Data Validator" "Validates input data for consistency and correctness."
+        businessLogic -> dataValidator "Forwards the request for correct data fetching."
         student -> HtmlPages "Logs in and sends requests"
         teamsDao = component "Teams DAO" "Data access operations for teams."
         projectsDao = component "Projects DAO" "Data access operations for projects."
         submissionsDao = component "Submissions DAO" "Data access operations for submissions."
-        dataValidator = component "Data Validator" "Validates input data for consistency and correctness."
         queryProcessor = component "Query Processor" "Processes and optimizes database queries."
-        sessionManager -> dataValidator "Sends input data to"
-        
         dataValidator -> teamsDao "Sends data concerning teams"
         dataValidator -> projectsDao "Sends data concerning projects"
         dataValidator -> submissionsDao "Sends data concerning the submission"
